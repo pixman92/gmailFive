@@ -27,7 +27,8 @@ var app = express();
 app.use(express.static('pubslic'));
 
 // http://expressjs.com/en/starter/basic-routing.html
-app.get("/", function (request, response) {
+app.get("/", function (request, response) {;
+  res.sen("hello I am me")
   response.sendFile(__dirname + '/views/index.html');
 });
 
