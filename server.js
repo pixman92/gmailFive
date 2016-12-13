@@ -4,12 +4,12 @@
 
 // fs.readFile('./views/index.html', function (err, html) {
 //     if (err) {
-//         throw err;
-//     }
-//     http.createServer(function(request, response) {
-//         response.writeHeader(200, {"Content-Type": "text/html"});
-//         response.write(html);
-//         response.end();
+//         throw err; 
+//     }       
+//     http.createServer(function(request, response) {  
+//         response.writeHeader(200, {"Content-Type": "text/html"});  
+//         response.write(html);  
+//         response.end();  
 //     }).listen(8000);
 // });
 
@@ -20,20 +20,15 @@
 var express = require('express');
 var app = express();
 
-// we've started you off with Express,
+// we've started you off with Express, 
 // but feel free to use whatever libs or frameworks you'd like through `package.json`.
 
 // http://expressjs.com/en/starter/static-files.html
-app.use(express.static('pubslic'));
+app.use(express.static('public'));
 
 // http://expressjs.com/en/starter/basic-routing.html
 app.get("/", function (request, response) {
-  res.sen("hello I am me")
   response.sendFile(__dirname + '/views/index.html');
-});
-
-app.get("/", function(req, res){
-  res.send("hello World");
 });
 // Simple in-memory store for no
 
