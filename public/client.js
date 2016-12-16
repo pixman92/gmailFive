@@ -1,159 +1,104 @@
-// client-side js
-// run by the browser each time your view template is loaded
-
-// by default, you've got jQuery,
-// add other scripts at the bottom of index.html
-
-arrayOfLetters = ["a", "b", "c", "d", "e", "f", "g", "h", 
-"i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s",
-"t", "u", "v", "w", "x", "y", "z", " ", "\"", ".", ",",
-"?", "!", "@", "#", "$", "%", "^", "&", "*",  "(", ")",
-"[", "]", "{", "}" ];
 
 
-arrayOfRandoms = ["100101111","110101010","010101101","011100010","011100100",
-"100110010","001100101","110001111","011011110","101100111","011000100","101011100",
-"010100010","010000011","111010001","011100011","000111010","111101100","100000011",
-"110000101","001001000","101100110","011001101","011001100","100011010","010100101",
-"011100001","100010000","011000111","001010110","100100001","001101001","111111010",
-"000011111","010100010","010000111","010101011","100111111","101011111","100001001",
-"111111101","011101001","010110011","001100010","100010011","100000010"];
 
-var count = 0;
-$("#startButton").click(function(){
-  resetAll();
-  
-  if($("#myWords").val()!==""||$("#myWords").val()!==null){
-    var arrayOfMyWords = gettingMyWords();
-    // var stringOf1and0 = printCor(arrayOfMyWords[count]);
-    var stringOf1and0 = printCor(arrayOfMyWords[count]);
-    blueOrWhite(stringOf1and0);
-    count=count+1;
-  }
-  if(count==($("#myWords").val().length)+1){
-      count=0;
-      console.log("true");
-      resetAll();
-      // alert("Done!");
-      $("#1").css("background-color", "orange");
-  }
-});
+      // Your Client ID can be retrieved from your project in the Google
+      // Developer Console, https://console.developers.google.com
+      var CLIENT_ID = '989077655905-l2hm6e9bv81eavs9pnj7602sj5mukti5.apps.googleusercontent.com';
 
-//one use function 
-function makeAndCheckRandoms(){
-  
-  for (var i=0; i<=35; i++){
-    var savedRandom = createRandoms();
-    for(var ii=0;ii<arrayOfRandoms.length;ii++){
-    if(savedRandom==arrayOfRandoms[ii]){
-      console.log("BAD! try again");
-      makeAndCheckRandoms()
-    }
-  }
-  console.log("\""+savedRandom+"\",");
-  }
-  
-  
-}
+      var SCOPES = ['https://www.googleapis.com/auth/gmail.readonly'];
 
-
-var myWordsArray = [];
-var display = 0;
-function gettingMyWords(){
-  var word = $("#myWords").val().toLowerCase();
-  for(var i=0, j=0;i<word.length;i++, j++){ 
-    myWordsArray[j]=word.substring(i,i+1);
-    console.log(myWordsArray);
-  }
-  return myWordsArray;
-  
-}
-
-function makeClick(){
-  $("#left").click(function(){
-  alert("ok");
-  for(var i=0;i<myWordsArray;i++){
-    if(display===0){
-      //do nothing
-    }
-    if(displa>=1){
-      //go back
-      
-      display = display-1;
-      console.log("dis "+display);
-      console.log(myWordsArray[display]);
-      printCor(myWordsArray[display]);
-    }
-      
-  }
-});
-}
-
-function createRandoms(){
-  var stringOfFlashes = "";
-     for(var ii=0; ii<9; ii++){
-       stringOfFlashes += onOrOff(0, 2);
-     }
-  // console.log(stringOfFlashes);
-  return stringOfFlashes;
-}
-
-function onOrOff(min, max){
-  return Math.floor(Math.random()*(max - min) + min);
-}
-
-//print Letter and corresponding string
-//soon to be flashing to squares
-function printCor(letter){
-  for(var i=0;i<=arrayOfLetters.length;i++){
-    if(letter == arrayOfLetters[i]){
-      console.log(arrayOfLetters[i]+"\n");
-      console.log(arrayOfRandoms[i]+"\n\n");
-      return arrayOfRandoms[i];
-    }else{
-      if(i>=arrayOfLetters.length){
-        return "";
+      /**
+       * Check if current user has authorized this application.
+       */
+      function checkAuth() {
+        gapi.auth.authorize(
+          {
+            'client_id': CLIENT_ID,
+            'scope': SCOPES.join(' '),
+            'immediate': true
+          }, handleAuthResult);
       }
-      
-    }
-  }
-  
-}
 
-function blueOrWhite(stringMe){
-  if(stringMe===""){$("#1").css("background-color", "black");}
-  for(var i=0;i<(stringMe.length);i++){     //length? -1 or regular??
-    console.log("StringMe: "+stringMe);
-    if(stringMe.substring(i, i+1)=="1"){
-      console.log("blue!");
-      var tmp = "#" + String(i+1);
-      $(tmp).css("background-color", "blue");
-    }else{
-      console.log("white!");
-    }
-  }
-}
+      /**
+       * Handle response from authorization server.
+       *
+       * @param {Object} authResult Authorization result.
+       */
+      function handleAuthResult(authResult) {
+        var authorizeDiv = document.getElementById('authorize-div');
+        if (authResult && !authResult.error) {
+          // Hide auth UI, then load client library.
+          authorizeDiv.style.display = 'none';
+          loadGmailApi();
+        } else {
+          // Show auth UI, allowing the user to initiate authorization by
+          // clicking authorize button.
+          authorizeDiv.style.display = 'inline';
+        }
+      }
 
-function resetAll(){
-  for(var i=1;i<=9;i++){
-    var tmp = "#" + String(i);
-    $(tmp).css("background-color", "white");
-  }
-  // count=0;
-}
+      /**
+       * Initiate auth flow in response to user clicking authorize button.
+       *
+       * @param {Event} event Button click event.
+       */
+      function handleAuthClick(event) {
+        gapi.auth.authorize(
+          {client_id: CLIENT_ID, scope: SCOPES, immediate: false},
+          handleAuthResult);
+        return false;
+      }
 
+      /**
+       * Load Gmail API client library. List labels once client library
+       * is loaded.
+       */
+      function loadGmailApi() {
+        gapi.client.load('gmail', 'v1', listLabels);
+      }
 
-//===============
+      /**
+       * Print all Labels in the authorized user's inbox. If no labels
+       * are found an appropriate message is printed.
+       */
+      function listLabels() {
+       //var request = gapi.client.gmail.users.labels.list({
+          //'userId': 'me'
+        //}); 
+    
+      var request = gapi.client.gmail.user.message.list({
+        'userId': 'me',
+        'labelIds': 'INBOX',
+        'maxResults': 10
+      });
+        
+      console.log(request);
+    
+        // request.execute(function(resp) {
+        //   var labels = resp.labels;
+        //   appendPre('Labels:');
+        
+        //   if (labels && labels.length > 0) {
+        //     for (i = 0; i < labels.length; i++) {
+        //       var label = labels[i];
+        //       appendPre(label.name)
+        //     }
+        //   } else {
+        //     appendPre('No Labels found.');
+        //   }
+        // });
+      }
 
-window.onload = function(){
-  if(localStorage.getItem("words")!==null||localStorage.getItem("words")!==""||
-  localStorage.getItem("words")!==undefined){
-    $("#myWords").val(localStorage.getItem("words"));
-  }
-}
+      /**
+       * Append a pre element to the body containing the given message
+       * as its text node.
+       *
+       * @param {string} message Text to be placed in pre element.
+       */
+      function appendPre(message) {
+        var pre = document.getElementById('output');
+        var textContent = document.createTextNode(message + '\n');
+        pre.appendChild(textContent);
+      }
 
-
-$("#myWords").change(function(){
-    localStorage.setItem("words", $("#myWords").val());
-
-});
+    
